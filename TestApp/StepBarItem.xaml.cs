@@ -80,28 +80,34 @@ namespace TestApp
 
         private void SetActive()
         {
+            var activeColorBrush = new SolidColorBrush(ActiveColor);
+
             Step.Fill = new SolidColorBrush(Colors.White);
-            Step.Stroke = new SolidColorBrush(ActiveColor);
-            NumberStep.Foreground = new SolidColorBrush(ActiveColor);
-            NameStep.Foreground = new SolidColorBrush(ActiveColor);
+            Step.Stroke = activeColorBrush;
+            NumberStep.Foreground = activeColorBrush;
+            NameStep.Foreground = activeColorBrush;
 
             Bar.Value = 100;
         }
 
         private void SetNotActive()
         {
+            var notActiveColorBrush = new SolidColorBrush(NotActiveColor);
+
             Step.Fill = new SolidColorBrush(Colors.White);
-            Step.Stroke = new SolidColorBrush(NotActiveColor);
-            NumberStep.Foreground = new SolidColorBrush(NotActiveColor);
-            NameStep.Foreground = new SolidColorBrush(NotActiveColor);
+            Step.Stroke = notActiveColorBrush;
+            NumberStep.Foreground = notActiveColorBrush;
+            NameStep.Foreground = notActiveColorBrush;
 
             Bar.Value = 0;
         }
 
         private void SetComplete()
         {
-            Step.Fill = new SolidColorBrush(CompleteColor);
-            Step.Stroke = new SolidColorBrush(CompleteColor);
+            var completeColorBrush = new SolidColorBrush(CompleteColor);
+
+            Step.Fill = completeColorBrush;
+            Step.Stroke = completeColorBrush;
             NumberStep.Foreground = new SolidColorBrush(Colors.White);
             NameStep.Foreground = new SolidColorBrush(DefaultColor);
 

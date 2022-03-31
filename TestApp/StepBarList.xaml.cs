@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,8 +15,7 @@ namespace TestApp
             InitializeComponent();
         }
 
-        public static DependencyProperty ActiveColorProperty = DependencyProperty.Register(nameof(ActiveColor), typeof(Color), typeof(StepBarList),
-            new FrameworkPropertyMetadata(Colors.RoyalBlue, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, ColorChangedCallback));
+        public static DependencyProperty ActiveColorProperty = DependencyProperty.Register(nameof(ActiveColor), typeof(Color), typeof(StepBarList), new PropertyMetadata(Colors.RoyalBlue, ColorChangedCallback));
 
         public Color ActiveColor
         {
@@ -23,8 +23,7 @@ namespace TestApp
             set => SetValue(ActiveColorProperty, value);
         }
 
-        public static DependencyProperty NotActiveColorProperty = DependencyProperty.Register(nameof(NotActiveColor), typeof(Color), typeof(StepBarList),
-            new FrameworkPropertyMetadata(Colors.LightGray, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, ColorChangedCallback));
+        public static DependencyProperty NotActiveColorProperty = DependencyProperty.Register(nameof(NotActiveColor), typeof(Color), typeof(StepBarList), new PropertyMetadata(Colors.LightGray, ColorChangedCallback));
 
         public Color NotActiveColor
         {
@@ -32,8 +31,7 @@ namespace TestApp
             set => SetValue(NotActiveColorProperty, value);
         }
 
-        public static DependencyProperty CompleteColorProperty = DependencyProperty.Register(nameof(CompleteColor), typeof(Color), typeof(StepBarList),
-            new FrameworkPropertyMetadata(Colors.RoyalBlue, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, ColorChangedCallback));
+        public static DependencyProperty CompleteColorProperty = DependencyProperty.Register(nameof(CompleteColor), typeof(Color), typeof(StepBarList), new PropertyMetadata(Colors.RoyalBlue, ColorChangedCallback));
 
         public Color CompleteColor
         {
@@ -41,8 +39,7 @@ namespace TestApp
             set => SetValue(CompleteColorProperty, value);
         }
 
-        public static DependencyProperty DefaultColorProperty = DependencyProperty.Register(nameof(DefaultColor), typeof(Color), typeof(StepBarList),
-            new FrameworkPropertyMetadata(Colors.Black, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, ColorChangedCallback));
+        public static DependencyProperty DefaultColorProperty = DependencyProperty.Register(nameof(DefaultColor), typeof(Color), typeof(StepBarList), new PropertyMetadata(Colors.Black, ColorChangedCallback));
 
         public Color DefaultColor
         {
@@ -60,40 +57,27 @@ namespace TestApp
             stepBarList.UpdateCurrentStep();
         }
 
-        public static DependencyProperty CountStepProperty = DependencyProperty.Register(nameof(CountStep), typeof(int), typeof(StepBarList),
-            new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, CountStepChangedCallback));
+        public static DependencyProperty CountStepProperty = DependencyProperty.Register(nameof(CountStep), typeof(int), typeof(StepBarList), new PropertyMetadata(1, CountStepChangedCallback));
 
-        private static void CountStepChangedCallback(DependencyObject dependencyObject,
-            DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        private static void CountStepChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var stepBarList = dependencyObject as StepBarList;
 
             var countStep = stepBarList?.CountStep ?? 1;
             var labelsCount = stepBarList?.Labels.Count ?? 0;
-            countStep = countStep < labelsCount ? labelsCount : countStep;
 
-            stepBarList?.RenderStepBar(countStep < 0 ? 1 : countStep);
+            stepBarList?.RenderStepBar(Math.Max(countStep, labelsCount));
         }
 
         public int CountStep
         {
             get => (int)GetValue(CountStepProperty);
-            set
-            {
-                if(CountStep == value)
-                    return;
-
-                var countStep = value < 0 ? 1 : value;
-                countStep = countStep < Labels.Count ? Labels.Count : countStep;
-
-                SetValue(CountStepProperty, countStep);
-            }
+            set => SetValue(CountStepProperty, value);
         }
 
         public static DependencyProperty LabelsProperty = DependencyProperty.Register(nameof(Labels), typeof(List<string>), typeof(StepBarList), new PropertyMetadata(new List<string>() ,LabelsChangedCallback));
 
-        private static void LabelsChangedCallback(DependencyObject dependencyObject,
-            DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        private static void LabelsChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var stepBarList = dependencyObject as StepBarList;
 
@@ -120,8 +104,7 @@ namespace TestApp
             }
         }
 
-        public static DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int), typeof(StepBarList),
-            new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender, CurrentStepChangedCallback));
+        public static DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int), typeof(StepBarList), new PropertyMetadata(1, CurrentStepChangedCallback));
 
         private static void CurrentStepChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
@@ -130,6 +113,7 @@ namespace TestApp
             if(stepBarList == null || stepBarList.MainGrid.Children.Count == 0)
                 return;
 
+            stepBarList.CurrentStep = (int)dependencyPropertyChangedEventArgs.NewValue;
             stepBarList.UpdateCurrentStep((int)dependencyPropertyChangedEventArgs.OldValue);
         }
 
@@ -149,7 +133,7 @@ namespace TestApp
 
         private void UpdateCurrentStep(int oldStep = 0)
         {
-            if (CurrentStep == 0)
+            if (CurrentStep <= 0)
             {
                 SetActiveFirstStep();
             }
@@ -203,7 +187,7 @@ namespace TestApp
         {
             var stepBarItems = MainGrid.FindVisualChildren<StepBarItem>().ToList();
 
-            if (currentStep < CountStep - 1)
+            if (currentStep < CountStep - 1 && currentStep >= 0)
             {
                 stepBarItems[currentStep].SetNotActiveWithAnimation();
             }
