@@ -9,40 +9,16 @@
         <Style x:Key="NameStepBaseStyle" TargetType="TextBlock">
             <Setter Property="Margin" Value="-100, 0" />
         </Style>
-        <Style x:Key="TextActiveStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="RoyalBlue" />
-        </Style>
         <Style x:Key="TextNotActiveStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="LightGray" />
-        </Style>
-        <Style x:Key="TextCompleteStyle" TargetType="TextBlock">
-            <Setter Property="Panel.ZIndex" Value="10" />
-            <Setter Property="Foreground" Value="White" />
-        </Style>
-        <Style x:Key="HeaderCompleteStyle" TargetType="TextBlock" BasedOn="{StaticResource NameStepBaseStyle}">
-            <Setter Property="Foreground" Value="Black" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
         <Style x:Key="HeaderNotActiveStyle" TargetType="TextBlock" BasedOn="{StaticResource NameStepBaseStyle}">
             <Setter Property="Foreground" Value="LightGray" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
-        <Style x:Key="HeaderActiveStyle" TargetType="TextBlock" BasedOn="{StaticResource NameStepBaseStyle}">
-            <Setter Property="Foreground" Value="RoyalBlue" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-        </Style>
-        <Style x:Key="EllipseActiveStyle" TargetType="Ellipse">
-            <Setter Property="Fill" Value="White" />
-            <Setter Property="Stroke" Value="RoyalBlue" />
-        </Style>
         <Style x:Key="EllipseNotActiveStyle" TargetType="Ellipse">
             <Setter Property="Fill" Value="White" />
             <Setter Property="Stroke" Value="LightGray" />
-        </Style>
-        <Style x:Key="EllipseCompleteStyle" TargetType="Ellipse">
-            <Setter Property="Fill" Value="RoyalBlue" />
-            <Setter Property="Panel.ZIndex" Value="10" />
-            <Setter Property="Stroke" Value="RoyalBlue" />
         </Style>
     </UserControl.Resources>
     <Grid>

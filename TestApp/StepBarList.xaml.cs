@@ -15,7 +15,7 @@ namespace TestApp
         }
 
         public static DependencyProperty ActiveColorProperty = DependencyProperty.Register(nameof(ActiveColor), typeof(Color), typeof(StepBarList),
-            new FrameworkPropertyMetadata(Colors.RoyalBlue, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None));
+            new FrameworkPropertyMetadata(Colors.RoyalBlue, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, ColorChangedCallback));
 
         public Color ActiveColor
         {
@@ -24,7 +24,7 @@ namespace TestApp
         }
 
         public static DependencyProperty NotActiveColorProperty = DependencyProperty.Register(nameof(NotActiveColor), typeof(Color), typeof(StepBarList),
-            new FrameworkPropertyMetadata(Colors.LightGray, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None));
+            new FrameworkPropertyMetadata(Colors.LightGray, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, ColorChangedCallback));
 
         public Color NotActiveColor
         {
@@ -33,7 +33,7 @@ namespace TestApp
         }
 
         public static DependencyProperty CompleteColorProperty = DependencyProperty.Register(nameof(CompleteColor), typeof(Color), typeof(StepBarList),
-            new FrameworkPropertyMetadata(Colors.RoyalBlue, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None));
+            new FrameworkPropertyMetadata(Colors.RoyalBlue, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, ColorChangedCallback));
 
         public Color CompleteColor
         {
@@ -42,7 +42,7 @@ namespace TestApp
         }
 
         public static DependencyProperty DefaultColorProperty = DependencyProperty.Register(nameof(DefaultColor), typeof(Color), typeof(StepBarList),
-            new FrameworkPropertyMetadata(Colors.Black, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None));
+            new FrameworkPropertyMetadata(Colors.Black, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, ColorChangedCallback));
 
         public Color DefaultColor
         {
@@ -50,9 +50,18 @@ namespace TestApp
             set => SetValue(DefaultColorProperty, value);
         }
 
+        private static void ColorChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var stepBarList = dependencyObject as StepBarList;
+
+            if (stepBarList == null || stepBarList.MainGrid.Children.Count == 0)
+                return;
+
+            stepBarList.UpdateCurrentStep();
+        }
+
         public static DependencyProperty CountStepProperty = DependencyProperty.Register(nameof(CountStep), typeof(int), typeof(StepBarList),
-            new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None,
-                new PropertyChangedCallback(CountStepChangedCallback)));
+            new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None, CountStepChangedCallback));
 
         private static void CountStepChangedCallback(DependencyObject dependencyObject,
             DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
@@ -60,6 +69,9 @@ namespace TestApp
             var stepBarList = dependencyObject as StepBarList;
 
             var countStep = stepBarList?.CountStep ?? 1;
+            var labelsCount = stepBarList?.Labels.Count ?? 0;
+            countStep = countStep < labelsCount ? labelsCount : countStep;
+
             stepBarList?.RenderStepBar(countStep < 0 ? 1 : countStep);
         }
 
@@ -108,32 +120,17 @@ namespace TestApp
             }
         }
 
-        public static DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int),
-            typeof(StepBarList),
-            new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender,
-                new PropertyChangedCallback(CurrentStepChangedCallback)));
+        public static DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int), typeof(StepBarList),
+            new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender, CurrentStepChangedCallback));
 
         private static void CurrentStepChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             var stepBarList = dependencyObject as StepBarList;
 
-            if(stepBarList == null)
+            if(stepBarList == null || stepBarList.MainGrid.Children.Count == 0)
                 return;
 
-            var currentStep = stepBarList.CurrentStep;
-            currentStep = currentStep < 0 ? 0 : currentStep;
-            currentStep = currentStep > stepBarList?.CountStep ? (int)stepBarList?.CountStep : currentStep;
-
-            stepBarList.UpdateCurrentStep();
-
-            if (currentStep > (int)dependencyPropertyChangedEventArgs.OldValue)
-            {
-                stepBarList?.NextCurrentStep(currentStep);
-            }
-            else
-            {
-                stepBarList?.PrevCurrentStep(currentStep);
-            }
+            stepBarList.UpdateCurrentStep((int)dependencyPropertyChangedEventArgs.OldValue);
         }
 
         public int CurrentStep
@@ -150,7 +147,7 @@ namespace TestApp
             }
         }
 
-        private void UpdateCurrentStep()
+        private void UpdateCurrentStep(int oldStep = 0)
         {
             if (CurrentStep == 0)
             {
@@ -167,12 +164,26 @@ namespace TestApp
             {
                 var stepBarItem = stepBarItems[i];
 
+                stepBarItem.ActiveColor = ActiveColor;
+                stepBarItem.CompleteColor = CompleteColor;
+                stepBarItem.DefaultColor = DefaultColor;
+                stepBarItem.NotActiveColor = NotActiveColor;
+
                 stepBarItem.Status = i < CurrentStep ? Status.Complete : Status.NotActive;
             }
 
             if(CurrentStep < CountStep && CurrentStep - 1 >= 0)
             {
                 stepBarItems[CurrentStep - 1].Status = Status.Active;
+            }
+
+            if (CurrentStep > oldStep)
+            {
+                NextCurrentStep(CurrentStep);
+            }
+            else
+            {
+                PrevCurrentStep(CurrentStep);
             }
 
             SetLastStep();
@@ -182,12 +193,10 @@ namespace TestApp
         {
             var stepBarItems = MainGrid.FindVisualChildren<StepBarItem>().ToList();
 
-            if (currentStep - 1 < CountStep - 1 && currentStep - 1 >= 0)
+            if (currentStep < CountStep && currentStep - 1 >= 0)
             {
                 stepBarItems[currentStep - 1].SetActiveWithAnimation();
             }
-
-            SetLastStep();
         }
 
         private void PrevCurrentStep(int currentStep)
@@ -198,8 +207,6 @@ namespace TestApp
             {
                 stepBarItems[currentStep].SetNotActiveWithAnimation();
             }
-
-            SetLastStep();
         }
 
         private void SetLastStep()
@@ -218,7 +225,7 @@ namespace TestApp
                     lastStepBarItem.NameStep.Foreground = new SolidColorBrush(ActiveColor);
                     break;
                 case Status.Complete:
-                    lastStepBarItem.NameStep.Foreground = new SolidColorBrush(CompleteColor);
+                    lastStepBarItem.NameStep.Foreground = new SolidColorBrush(DefaultColor);
                     break;
                 case Status.NotActive:
                     lastStepBarItem.NameStep.Foreground = new SolidColorBrush(NotActiveColor);

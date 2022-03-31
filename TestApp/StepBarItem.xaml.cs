@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media.Animation;
@@ -20,9 +19,6 @@ namespace TestApp
             get => _status;
             set
             {
-                if(_status == value)
-                    return;
-
                 switch (value)
                 {
                     case Status.NotActive:
@@ -40,89 +36,74 @@ namespace TestApp
             }
         }
 
-        public Color ActiveColor
-        {
-            get
-            {
-                var stepBarList = Parent as StepBarList;
-                return stepBarList?.ActiveColor ?? Colors.RoyalBlue;
-            }
-        }
+        public Color DefaultColor { get; set; }
+        public Color ActiveColor { get; set; }
 
+        private Color _notActiveColor;
         public Color NotActiveColor 
         {
-            get
+            get => _notActiveColor;
+            set
             {
-                var stepBarList = Parent as StepBarList;
-                return stepBarList?.NotActiveColor ?? Colors.LightGray;
+                _notActiveColor = value;
+
+                Bar.Background = new SolidColorBrush(value);
+                Bar.BorderBrush = new SolidColorBrush(value);
             }
         }
 
+        private Color _completeColor;
         public Color CompleteColor
         {
-            get
+            get => _completeColor;
+            set
             {
-                var stepBarList = Parent as StepBarList;
-                return stepBarList?.CompleteColor ?? Colors.RoyalBlue;
+                _completeColor = value;
+
+                Bar.Foreground = new SolidColorBrush(value);
             }
-        }
-
-        public Color DefaultColor
-        {
-            get
-            {
-                var stepBarList = Parent as StepBarList;
-                return stepBarList?.DefaultColor ?? Colors.Black;
-            }
-        }
-
-        private void SetActive()
-        {
-            Step.Style = Resources["EllipseActiveStyle"] as Style;
-            NumberStep.Style = Resources["TextActiveStyle"] as Style;
-            NameStep.Style = Resources["HeaderActiveStyle"] as Style;
-
-            Bar.Value = 100;
         }
 
         public void SetActiveWithAnimation()
         {
-            Step.Style = Resources["EllipseActiveStyle"] as Style;
-            NumberStep.Style = Resources["TextActiveStyle"] as Style;
-            NameStep.Style = Resources["HeaderActiveStyle"] as Style;
-
             var animation = new DoubleAnimation(0, 100, TimeSpan.FromSeconds(0.2), FillBehavior.Stop);
 
             Bar.BeginAnimation(RangeBase.ValueProperty, animation);
+        }
+
+        public void SetNotActiveWithAnimation()
+        {
+            var animation = new DoubleAnimation(100, 0, TimeSpan.FromSeconds(0.2), FillBehavior.Stop);
+
+            Bar.BeginAnimation(RangeBase.ValueProperty, animation);
+        }
+
+        private void SetActive()
+        {
+            Step.Fill = new SolidColorBrush(Colors.White);
+            Step.Stroke = new SolidColorBrush(ActiveColor);
+            NumberStep.Foreground = new SolidColorBrush(ActiveColor);
+            NameStep.Foreground = new SolidColorBrush(ActiveColor);
+
             Bar.Value = 100;
         }
 
         private void SetNotActive()
         {
-            Step.Style = Resources["EllipseNotActiveStyle"] as Style;
-            NumberStep.Style = Resources["TextNotActiveStyle"] as Style;
-            NameStep.Style = Resources["HeaderNotActiveStyle"] as Style;
+            Step.Fill = new SolidColorBrush(Colors.White);
+            Step.Stroke = new SolidColorBrush(NotActiveColor);
+            NumberStep.Foreground = new SolidColorBrush(NotActiveColor);
+            NameStep.Foreground = new SolidColorBrush(NotActiveColor);
 
-            Bar.Value = 0;
-        }
-
-        public void SetNotActiveWithAnimation()
-        {
-            Step.Style = Resources["EllipseNotActiveStyle"] as Style;
-            NumberStep.Style = Resources["TextNotActiveStyle"] as Style;
-            NameStep.Style = Resources["HeaderNotActiveStyle"] as Style;
-
-            var animation = new DoubleAnimation(100, 0, TimeSpan.FromSeconds(0.2), FillBehavior.Stop);
-
-            Bar.BeginAnimation(RangeBase.ValueProperty, animation);
             Bar.Value = 0;
         }
 
         private void SetComplete()
         {
-            Step.Style = Resources["EllipseCompleteStyle"] as Style;
-            NumberStep.Style = Resources["TextCompleteStyle"] as Style;
-            NameStep.Style = Resources["HeaderCompleteStyle"] as Style;
+            Step.Fill = new SolidColorBrush(CompleteColor);
+            Step.Stroke = new SolidColorBrush(CompleteColor);
+            NumberStep.Foreground = new SolidColorBrush(Colors.White);
+            NameStep.Foreground = new SolidColorBrush(DefaultColor);
 
             Bar.Value = 100;
         }

@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestApp"
-        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
@@ -17,8 +16,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <local:StepBarList Grid.ColumnSpan="2" x:Name="StepBarControla" CurrentStep="1" Margin="20" />
-        <!--<local:StepBarControl Grid.ColumnSpan="2" x:Name="StepBarControla" CountStep="7" CurrentStep="2"  Margin="20"/>-->
+        <local:StepBarList Grid.ColumnSpan="2" x:Name="StepBarControla" CurrentStep="3" CountStep="4" Margin="20" CompleteColor="PaleGreen" ActiveColor="DarkSeaGreen" NotActiveColor="BurlyWood" DefaultColor="GreenYellow" />
         <Button Grid.Row="1" Width="100" Height="20" HorizontalAlignment="Right" Margin="0, 0, 20, 0" Click="ButtonBase_OnClick" Content="Prev" />
         <Button Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Width="100" Height="20" Margin="20, 0, 0, 0" Click="NExt" Content="Next" />
         <local:StepBarItem Grid.Column="1" Grid.Row="1" Status="Complete" HorizontalAlignment="Right" Margin="20" />
