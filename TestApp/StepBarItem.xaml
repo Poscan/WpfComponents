@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="TestApp.StepBarItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:testApp="clr-namespace:TestApp"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style x:Key="NameStepBaseStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="-100, 0" />
+        </Style>
+        <Style x:Key="TextActiveStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="RoyalBlue" />
+        </Style>
+        <Style x:Key="TextNotActiveStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="LightGray" />
+        </Style>
+        <Style x:Key="TextCompleteStyle" TargetType="TextBlock">
+            <Setter Property="Panel.ZIndex" Value="10" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style x:Key="HeaderCompleteStyle" TargetType="TextBlock" BasedOn="{StaticResource NameStepBaseStyle}">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="HeaderNotActiveStyle" TargetType="TextBlock" BasedOn="{StaticResource NameStepBaseStyle}">
+            <Setter Property="Foreground" Value="LightGray" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="HeaderActiveStyle" TargetType="TextBlock" BasedOn="{StaticResource NameStepBaseStyle}">
+            <Setter Property="Foreground" Value="RoyalBlue" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="EllipseActiveStyle" TargetType="Ellipse">
+            <Setter Property="Fill" Value="White" />
+            <Setter Property="Stroke" Value="RoyalBlue" />
+        </Style>
+        <Style x:Key="EllipseNotActiveStyle" TargetType="Ellipse">
+            <Setter Property="Fill" Value="White" />
+            <Setter Property="Stroke" Value="LightGray" />
+        </Style>
+        <Style x:Key="EllipseCompleteStyle" TargetType="Ellipse">
+            <Setter Property="Fill" Value="RoyalBlue" />
+            <Setter Property="Panel.ZIndex" Value="10" />
+            <Setter Property="Stroke" Value="RoyalBlue" />
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="30" />
+        </Grid.ColumnDefinitions>
+        <ProgressBar Height="7" Name="Bar" Maximum="100" Minimum="0" Panel.ZIndex="-1" />
+
+        <Ellipse Grid.Column="1" Name="Step" Height="30" Width="30" Panel.ZIndex="1" Style="{StaticResource EllipseNotActiveStyle}"/>
+        <TextBlock Grid.Column="1" Text="1" Name="NumberStep" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="2" Style="{StaticResource TextNotActiveStyle}" />
+
+        <TextBlock Grid.Column="1" Grid.Row="1" Name="NameStep" Style="{StaticResource HeaderNotActiveStyle}"/>
+    </Grid>
+</UserControl>

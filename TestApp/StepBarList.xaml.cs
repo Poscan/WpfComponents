@@ -1,0 +1,327 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Shapes;
+
+namespace TestApp
+{
+    public partial class StepBarList : UserControl
+    {
+        public StepBarList()
+        {
+            InitializeComponent();
+        }
+
+        public static DependencyProperty ActiveColorProperty = DependencyProperty.Register(nameof(ActiveColor), typeof(Color), typeof(StepBarList),
+            new FrameworkPropertyMetadata(Colors.RoyalBlue, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None));
+
+        public Color ActiveColor
+        {
+            get => (Color)GetValue(ActiveColorProperty);
+            set => SetValue(ActiveColorProperty, value);
+        }
+
+        public static DependencyProperty NotActiveColorProperty = DependencyProperty.Register(nameof(NotActiveColor), typeof(Color), typeof(StepBarList),
+            new FrameworkPropertyMetadata(Colors.LightGray, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None));
+
+        public Color NotActiveColor
+        {
+            get => (Color)GetValue(NotActiveColorProperty);
+            set => SetValue(NotActiveColorProperty, value);
+        }
+
+        public static DependencyProperty CompleteColorProperty = DependencyProperty.Register(nameof(CompleteColor), typeof(Color), typeof(StepBarList),
+            new FrameworkPropertyMetadata(Colors.RoyalBlue, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None));
+
+        public Color CompleteColor
+        {
+            get => (Color)GetValue(CompleteColorProperty);
+            set => SetValue(CompleteColorProperty, value);
+        }
+
+        public static DependencyProperty DefaultColorProperty = DependencyProperty.Register(nameof(DefaultColor), typeof(Color), typeof(StepBarList),
+            new FrameworkPropertyMetadata(Colors.Black, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None));
+
+        public Color DefaultColor
+        {
+            get => (Color)GetValue(DefaultColorProperty);
+            set => SetValue(DefaultColorProperty, value);
+        }
+
+        public static DependencyProperty CountStepProperty = DependencyProperty.Register(nameof(CountStep), typeof(int), typeof(StepBarList),
+            new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.None,
+                new PropertyChangedCallback(CountStepChangedCallback)));
+
+        private static void CountStepChangedCallback(DependencyObject dependencyObject,
+            DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var stepBarList = dependencyObject as StepBarList;
+
+            var countStep = stepBarList?.CountStep ?? 1;
+            stepBarList?.RenderStepBar(countStep < 0 ? 1 : countStep);
+        }
+
+        public int CountStep
+        {
+            get => (int)GetValue(CountStepProperty);
+            set
+            {
+                if(CountStep == value)
+                    return;
+
+                var countStep = value < 0 ? 1 : value;
+                countStep = countStep < Labels.Count ? Labels.Count : countStep;
+
+                SetValue(CountStepProperty, countStep);
+            }
+        }
+
+        public static DependencyProperty LabelsProperty = DependencyProperty.Register(nameof(Labels), typeof(List<string>), typeof(StepBarList), new PropertyMetadata(new List<string>() ,LabelsChangedCallback));
+
+        private static void LabelsChangedCallback(DependencyObject dependencyObject,
+            DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var stepBarList = dependencyObject as StepBarList;
+
+            if(stepBarList?.MainGrid?.Children.Count > 0)
+            {
+                stepBarList?.RenderStepBar(stepBarList.CountStep);
+            }
+        }
+
+        public List<string> Labels
+        {
+            get => (List<string>)GetValue(LabelsProperty);
+            set
+            {
+                if(value == Labels)
+                    return;
+
+                if (value.Count > CountStep)
+                {
+                    SetValue(CountStepProperty, value.Count);
+                }
+
+                SetValue(LabelsProperty, value);
+            }
+        }
+
+        public static DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int),
+            typeof(StepBarList),
+            new FrameworkPropertyMetadata(1, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender,
+                new PropertyChangedCallback(CurrentStepChangedCallback)));
+
+        private static void CurrentStepChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var stepBarList = dependencyObject as StepBarList;
+
+            if(stepBarList == null)
+                return;
+
+            var currentStep = stepBarList.CurrentStep;
+            currentStep = currentStep < 0 ? 0 : currentStep;
+            currentStep = currentStep > stepBarList?.CountStep ? (int)stepBarList?.CountStep : currentStep;
+
+            stepBarList.UpdateCurrentStep();
+
+            if (currentStep > (int)dependencyPropertyChangedEventArgs.OldValue)
+            {
+                stepBarList?.NextCurrentStep(currentStep);
+            }
+            else
+            {
+                stepBarList?.PrevCurrentStep(currentStep);
+            }
+        }
+
+        public int CurrentStep
+        {
+            get => (int)GetValue(CurrentStepProperty);
+            set
+            {
+                if (CurrentStep == value)
+                    return;
+
+                var currentStep = value < 0 ? 0 : value;
+                currentStep = currentStep > CountStep ? CountStep : currentStep;
+                SetValue(CurrentStepProperty, currentStep);
+            }
+        }
+
+        private void UpdateCurrentStep()
+        {
+            if (CurrentStep == 0)
+            {
+                SetActiveFirstStep();
+            }
+            else
+            {
+                SetCompleteFirstStep();
+            }
+
+            var stepBarItems = MainGrid.FindVisualChildren<StepBarItem>().ToList();
+
+            for (var i = 0; i < stepBarItems.Count; i++)
+            {
+                var stepBarItem = stepBarItems[i];
+
+                stepBarItem.Status = i < CurrentStep ? Status.Complete : Status.NotActive;
+            }
+
+            if(CurrentStep < CountStep && CurrentStep - 1 >= 0)
+            {
+                stepBarItems[CurrentStep - 1].Status = Status.Active;
+            }
+
+            SetLastStep();
+        }
+
+        private void NextCurrentStep(int currentStep)
+        {
+            var stepBarItems = MainGrid.FindVisualChildren<StepBarItem>().ToList();
+
+            if (currentStep - 1 < CountStep - 1 && currentStep - 1 >= 0)
+            {
+                stepBarItems[currentStep - 1].SetActiveWithAnimation();
+            }
+
+            SetLastStep();
+        }
+
+        private void PrevCurrentStep(int currentStep)
+        {
+            var stepBarItems = MainGrid.FindVisualChildren<StepBarItem>().ToList();
+
+            if (currentStep < CountStep - 1)
+            {
+                stepBarItems[currentStep].SetNotActiveWithAnimation();
+            }
+
+            SetLastStep();
+        }
+
+        private void SetLastStep()
+        {
+            var stepBarItems = MainGrid.FindVisualChildren<StepBarItem>().ToList();
+            var lastStepBarItem = stepBarItems.LastOrDefault();
+
+            if (lastStepBarItem == null)
+                return;
+
+            lastStepBarItem.NameStep.Style = Resources["LastStepBarItemStyle"] as Style;
+
+            switch (lastStepBarItem.Status)
+            {
+                case Status.Active:
+                    lastStepBarItem.NameStep.Foreground = new SolidColorBrush(ActiveColor);
+                    break;
+                case Status.Complete:
+                    lastStepBarItem.NameStep.Foreground = new SolidColorBrush(CompleteColor);
+                    break;
+                case Status.NotActive:
+                    lastStepBarItem.NameStep.Foreground = new SolidColorBrush(NotActiveColor);
+                    break;
+            }
+        }
+
+        private void SetCompleteFirstStep()
+        {
+            var solidColorBrush = new SolidColorBrush(CompleteColor);
+
+            var firstEllipse = GetFirstEllipse();
+            firstEllipse.Stroke = solidColorBrush;
+            firstEllipse.Fill = solidColorBrush;
+
+            GetFirstNumberText().Foreground = new SolidColorBrush(Colors.White);
+            GetFirstNameText().Foreground = new SolidColorBrush(DefaultColor);
+        }
+
+        private void SetActiveFirstStep()
+        {
+            var solidColorBrush = new SolidColorBrush(ActiveColor);
+
+            var firstEllipse = GetFirstEllipse();
+            firstEllipse.Stroke = solidColorBrush;
+            firstEllipse.Fill = new SolidColorBrush(Colors.White);
+            
+            GetFirstNameText().Foreground = solidColorBrush;
+            GetFirstNumberText().Foreground = solidColorBrush;
+        }
+
+        private Ellipse GetFirstEllipse()
+        {
+            return MainGrid.Children[0] as Ellipse;
+        }
+
+        private TextBlock GetFirstNumberText()
+        {
+            return MainGrid.Children[1] as TextBlock;
+        }
+
+        private TextBlock GetFirstNameText()
+        {
+            return MainGrid.Children[2] as TextBlock;
+        }
+
+        private void RenderStepBar(int countStep)
+        {
+            MainGrid.ColumnDefinitions.Clear();
+            MainGrid.RowDefinitions.Clear();
+            MainGrid.Children.Clear();
+
+            CreateFirstStep();
+
+            for (var i = 1; i < countStep; i++)
+            {
+                var columnEllipse = new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) };
+                MainGrid.ColumnDefinitions.Add(columnEllipse);
+
+                var stepBarItem = new StepBarItem();
+                stepBarItem.NumberStep.Text = (i + 1).ToString();
+                stepBarItem.NameStep.Text = Labels?.Count > i ? Labels[i] : string.Empty;
+                stepBarItem.Status = Status.NotActive;
+
+                MainGrid.Children.Add(stepBarItem);
+
+                Grid.SetColumn(stepBarItem, i);
+                Grid.SetRowSpan(stepBarItem, 2);
+            }
+
+            UpdateCurrentStep();
+        }
+
+        private void CreateFirstStep()
+        {
+            var gridLength = new GridLength(30);
+            var firstColumn = new ColumnDefinition { Width = gridLength };
+            var firstRow = new RowDefinition { Height = gridLength };
+            var secondRow = new RowDefinition { Height = gridLength };
+
+            MainGrid.ColumnDefinitions.Add(firstColumn);
+            MainGrid.RowDefinitions.Add(firstRow);
+            MainGrid.RowDefinitions.Add(secondRow);
+
+            var ellipse = new Ellipse();
+            ellipse.Height = 30;
+            ellipse.Width = 30;
+
+            var numberStep = new TextBlock();
+            numberStep.Text = "1";
+            numberStep.HorizontalAlignment = HorizontalAlignment.Center;
+            numberStep.VerticalAlignment = VerticalAlignment.Center;
+
+            var nameStep = new TextBlock();
+            nameStep.Text = Labels.Count > 0 ? Labels[0] : string.Empty;
+            nameStep.HorizontalAlignment = HorizontalAlignment.Left;
+            nameStep.Margin = new Thickness(-20, 0, -100, 0);
+
+            MainGrid.Children.Add(ellipse);
+            MainGrid.Children.Add(numberStep);
+            MainGrid.Children.Add(nameStep);
+
+            Grid.SetRow(nameStep, 1);
+        }
+    }
+}
