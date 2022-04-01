@@ -6,16 +6,16 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace TestApp
+namespace TestApp.StepBarV1
 {
-    public partial class StepBarList : UserControl
+    public partial class StepBar
     {
-        public StepBarList()
+        public StepBar()
         {
             InitializeComponent();
         }
 
-        public static DependencyProperty ActiveColorProperty = DependencyProperty.Register(nameof(ActiveColor), typeof(Color), typeof(StepBarList), new PropertyMetadata(Colors.RoyalBlue, ColorChangedCallback));
+        public static DependencyProperty ActiveColorProperty = DependencyProperty.Register(nameof(ActiveColor), typeof(Color), typeof(StepBar), new PropertyMetadata(Colors.RoyalBlue, ColorChangedCallback));
 
         public Color ActiveColor
         {
@@ -23,7 +23,7 @@ namespace TestApp
             set => SetValue(ActiveColorProperty, value);
         }
 
-        public static DependencyProperty NotActiveColorProperty = DependencyProperty.Register(nameof(NotActiveColor), typeof(Color), typeof(StepBarList), new PropertyMetadata(Colors.LightGray, ColorChangedCallback));
+        public static DependencyProperty NotActiveColorProperty = DependencyProperty.Register(nameof(NotActiveColor), typeof(Color), typeof(StepBar), new PropertyMetadata(Colors.LightGray, ColorChangedCallback));
 
         public Color NotActiveColor
         {
@@ -31,7 +31,7 @@ namespace TestApp
             set => SetValue(NotActiveColorProperty, value);
         }
 
-        public static DependencyProperty CompleteColorProperty = DependencyProperty.Register(nameof(CompleteColor), typeof(Color), typeof(StepBarList), new PropertyMetadata(Colors.RoyalBlue, ColorChangedCallback));
+        public static DependencyProperty CompleteColorProperty = DependencyProperty.Register(nameof(CompleteColor), typeof(Color), typeof(StepBar), new PropertyMetadata(Colors.RoyalBlue, ColorChangedCallback));
 
         public Color CompleteColor
         {
@@ -39,7 +39,7 @@ namespace TestApp
             set => SetValue(CompleteColorProperty, value);
         }
 
-        public static DependencyProperty DefaultColorProperty = DependencyProperty.Register(nameof(DefaultColor), typeof(Color), typeof(StepBarList), new PropertyMetadata(Colors.Black, ColorChangedCallback));
+        public static DependencyProperty DefaultColorProperty = DependencyProperty.Register(nameof(DefaultColor), typeof(Color), typeof(StepBar), new PropertyMetadata(Colors.Black, ColorChangedCallback));
 
         public Color DefaultColor
         {
@@ -49,7 +49,7 @@ namespace TestApp
 
         private static void ColorChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var stepBarList = dependencyObject as StepBarList;
+            var stepBarList = dependencyObject as StepBar;
 
             if (stepBarList == null || stepBarList.MainGrid.Children.Count == 0)
                 return;
@@ -57,11 +57,11 @@ namespace TestApp
             stepBarList.UpdateCurrentStep();
         }
 
-        public static DependencyProperty CountStepProperty = DependencyProperty.Register(nameof(CountStep), typeof(int), typeof(StepBarList), new PropertyMetadata(1, CountStepChangedCallback));
+        public static DependencyProperty CountStepProperty = DependencyProperty.Register(nameof(CountStep), typeof(int), typeof(StepBar), new PropertyMetadata(1, CountStepChangedCallback));
 
         private static void CountStepChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var stepBarList = dependencyObject as StepBarList;
+            var stepBarList = dependencyObject as StepBar;
 
             var countStep = stepBarList?.CountStep ?? 1;
             var labelsCount = stepBarList?.Labels.Count ?? 0;
@@ -75,11 +75,11 @@ namespace TestApp
             set => SetValue(CountStepProperty, value);
         }
 
-        public static DependencyProperty LabelsProperty = DependencyProperty.Register(nameof(Labels), typeof(List<string>), typeof(StepBarList), new PropertyMetadata(new List<string>() ,LabelsChangedCallback));
+        public static DependencyProperty LabelsProperty = DependencyProperty.Register(nameof(Labels), typeof(List<string>), typeof(StepBar), new PropertyMetadata(new List<string>() ,LabelsChangedCallback));
 
         private static void LabelsChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var stepBarList = dependencyObject as StepBarList;
+            var stepBarList = dependencyObject as StepBar;
 
             if(stepBarList?.MainGrid?.Children.Count > 0)
             {
@@ -104,11 +104,11 @@ namespace TestApp
             }
         }
 
-        public static DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int), typeof(StepBarList), new PropertyMetadata(1, CurrentStepChangedCallback));
+        public static DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int), typeof(StepBar), new PropertyMetadata(1, CurrentStepChangedCallback));
 
         private static void CurrentStepChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var stepBarList = dependencyObject as StepBarList;
+            var stepBarList = dependencyObject as StepBar;
 
             if(stepBarList == null || stepBarList.MainGrid.Children.Count == 0)
                 return;
@@ -306,7 +306,7 @@ namespace TestApp
             var nameStep = new TextBlock();
             nameStep.Text = Labels.Count > 0 ? Labels[0] : string.Empty;
             nameStep.HorizontalAlignment = HorizontalAlignment.Left;
-            nameStep.Margin = new Thickness(-20, 0, -100, 0);
+            nameStep.Margin = new Thickness(-20, 6, -100, 0);
 
             MainGrid.Children.Add(ellipse);
             MainGrid.Children.Add(numberStep);

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Media.Animation;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
-namespace TestApp
+namespace TestApp.StepBarV1
 {
-    public partial class StepBarItem : UserControl
+    public partial class StepBarItem
     {
         public StepBarItem()
         {
