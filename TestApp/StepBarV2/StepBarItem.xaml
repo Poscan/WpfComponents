@@ -4,20 +4,41 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
+             HorizontalAlignment="Stretch"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <UserControl.Resources>
+        <Style x:Key="ProgressBarBaseStyle" TargetType="ProgressBar">
+            <Setter Property="Minimum" Value="0" />
+            <Setter Property="Maximum" Value="100" />
+            <Setter Property="Value" Value="0" />
+            <Setter Property="Height" Value="7" />
+        </Style>
+        <Style x:Key="TextBlockBaseStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style x:Key="EllipseBaseStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="Azure">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
+            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="30" />
-            <ColumnDefinition />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <ProgressBar Grid.Row="0" Grid.Column="0" Minimum="0" Maximum="100" Value="50"></ProgressBar>
-        <Ellipse Width="30" Height="30" Stroke="RoyalBlue" />
-        <ProgressBar Grid.Row="0" Grid.Column="2" Minimum="0" Maximum="100" Value="50"></ProgressBar>
+        <ProgressBar Name="LeftBar" Grid.Row="0" Grid.Column="0" Style="{StaticResource ProgressBarBaseStyle}" />
+        <Ellipse Name="Step" Grid.Row="0" Grid.Column="1" Style="{StaticResource EllipseBaseStyle}" Stroke="RoyalBlue" />
+        <TextBlock Name="NumberStep" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBlockBaseStyle}" Text="1" />
+        <ProgressBar Name="RightBar" Grid.Row="0" Grid.Column="2" Style="{StaticResource ProgressBarBaseStyle}" />
+
+        <TextBlock Name="NameStep" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TextBlockBaseStyle}"  Text="Подписать врачом"/>
     </Grid>
 </UserControl>

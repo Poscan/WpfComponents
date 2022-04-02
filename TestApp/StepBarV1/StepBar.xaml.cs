@@ -49,9 +49,7 @@ namespace TestApp.StepBarV1
 
         private static void ColorChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var stepBarList = dependencyObject as StepBar;
-
-            if (stepBarList == null || stepBarList.MainGrid.Children.Count == 0)
+            if (!(dependencyObject is StepBar stepBarList) || stepBarList.MainGrid.Children.Count == 0)
                 return;
 
             stepBarList.UpdateCurrentStep();
@@ -108,9 +106,7 @@ namespace TestApp.StepBarV1
 
         private static void CurrentStepChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var stepBarList = dependencyObject as StepBar;
-
-            if(stepBarList == null || stepBarList.MainGrid.Children.Count == 0)
+            if(!(dependencyObject is StepBar stepBarList) || stepBarList.MainGrid.Children.Count == 0)
                 return;
 
             stepBarList.CurrentStep = (int)dependencyPropertyChangedEventArgs.NewValue;
