@@ -15,6 +15,14 @@ namespace TestApp.StepBarV1
             InitializeComponent();
         }
 
+        public static DependencyProperty ActiveContentProperty = DependencyProperty.Register(nameof(ActiveContent), typeof(FrameworkElement), typeof(StepBar), new PropertyMetadata(null, null));
+
+        public FrameworkElement ActiveContent
+        {
+            get => (FrameworkElement)GetValue(ActiveContentProperty);
+            set => SetValue(ActiveContentProperty, value);
+        }
+
         public static DependencyProperty ActiveColorProperty = DependencyProperty.Register(nameof(ActiveColor), typeof(Color), typeof(StepBar), new PropertyMetadata(Colors.RoyalBlue, ColorChangedCallback));
 
         public Color ActiveColor
@@ -148,6 +156,7 @@ namespace TestApp.StepBarV1
                 stepBarItem.CompleteColor = CompleteColor;
                 stepBarItem.DefaultColor = DefaultColor;
                 stepBarItem.NotActiveColor = NotActiveColor;
+                stepBarItem.ActiveContent = ActiveContent;
 
                 stepBarItem.Status = i < CurrentStep ? Status.Complete : Status.NotActive;
             }

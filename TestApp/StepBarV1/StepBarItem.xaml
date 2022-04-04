@@ -32,8 +32,9 @@
         </Grid.ColumnDefinitions>
         <ProgressBar Height="7" Name="Bar" Maximum="100" Minimum="0" Panel.ZIndex="-1" />
 
-        <Ellipse Grid.Column="1" Name="Step" Height="30" Width="30" Panel.ZIndex="1" Style="{StaticResource EllipseNotActiveStyle}"/>
-        <TextBlock Grid.Column="1" Text="1" Name="NumberStep" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="2" Style="{StaticResource TextNotActiveStyle}" />
+        <Ellipse Grid.Row="0" Grid.Column="1" Name="Step" Height="30" Width="30" Panel.ZIndex="1" Style="{StaticResource EllipseNotActiveStyle}"/>
+        <ContentControl Grid.Row="0" Grid.Column="1" Name="ContentItem" Panel.ZIndex="2" />
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="1" Name="NumberStep" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="2" Style="{StaticResource TextNotActiveStyle}" />
 
         <TextBlock Grid.Column="1" Grid.Row="1" Name="NameStep" Style="{StaticResource HeaderNotActiveStyle}"/>
     </Grid>

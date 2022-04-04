@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -33,6 +34,13 @@ namespace TestApp.StepBarV1
 
                 _status = value;
             }
+        }
+
+        public static DependencyProperty ContentProperty = DependencyProperty.RegisterAttached(nameof(ActiveContent), typeof(FrameworkElement), typeof(StepBarItem), new PropertyMetadata(null, null));
+        public FrameworkElement ActiveContent
+        {
+            get => (FrameworkElement)GetValue(ContentProperty);
+            set => SetValue(ContentProperty, value);
         }
 
         public Color DefaultColor { get; set; }
@@ -86,6 +94,13 @@ namespace TestApp.StepBarV1
             NumberStep.Foreground = activeColorBrush;
             NameStep.Foreground = activeColorBrush;
 
+            if (ActiveContent != null)
+            {
+                NumberStep.Visibility = Visibility.Collapsed;
+                ContentItem.Visibility = Visibility.Visible;
+                ContentItem.Content = ActiveContent;
+            }
+
             Bar.Value = 100;
         }
 
@@ -98,6 +113,12 @@ namespace TestApp.StepBarV1
             NumberStep.Foreground = notActiveColorBrush;
             NameStep.Foreground = notActiveColorBrush;
 
+            if (ActiveContent != null)
+            {
+                NumberStep.Visibility = Visibility.Visible;
+                ContentItem.Visibility = Visibility.Collapsed;
+            }
+
             Bar.Value = 0;
         }
 
@@ -109,6 +130,12 @@ namespace TestApp.StepBarV1
             Step.Stroke = completeColorBrush;
             NumberStep.Foreground = new SolidColorBrush(Colors.White);
             NameStep.Foreground = new SolidColorBrush(DefaultColor);
+
+            if (ActiveContent != null)
+            {
+                NumberStep.Visibility = Visibility.Visible;
+                ContentItem.Visibility = Visibility.Collapsed;
+            }
 
             Bar.Value = 100;
         }
