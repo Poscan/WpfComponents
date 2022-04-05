@@ -25,6 +25,7 @@
             <Setter Property="Height" Value="30" />
         </Style>
         <testApp:IsFirstStepConverter x:Key="IsFirstStepConverter" />
+        <testApp:IsLastStepConverter x:Key="IsLastStepConverter" />
 
     </UserControl.Resources>
     <Grid Background="Azure">
@@ -42,29 +43,36 @@
             <ProgressBar.Style>
                 <Style BasedOn="{StaticResource ProgressBarBaseStyle}" TargetType="ProgressBar">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}, Converter={StaticResource IsFirstStepConverter}}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}, Converter={StaticResource IsFirstStepConverter}}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
+                    <Style.Setters>
+                        <Setter Property="Visibility" Value="Visible" />
+                    </Style.Setters>
                 </Style>
             </ProgressBar.Style>
         </ProgressBar>
 
         <Ellipse Name="Step" Grid.Row="0" Grid.Column="1" Style="{StaticResource EllipseBaseStyle}" Stroke="RoyalBlue" />
-        <TextBlock Name="NumberStep" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBlockBaseStyle}" Text="1" />
-        
-        <ProgressBar Name="RightBar" Grid.Row="0" Grid.Column="2">
+        <!--<TextBlock Name="NumberStep" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBlockBaseStyle}" Text="1" />-->
+        <ContentControl Name="StepContent" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}, Path=ActiveContent}" />
+
+        <ProgressBar Name="RightBar" Grid.Row="0" Grid.Column="2" >
             <ProgressBar.Style>
                 <Style BasedOn="{StaticResource ProgressBarBaseStyle}" TargetType="ProgressBar">
                     <Style.Triggers>
-                        <!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Converter={StaticResource }}" Value="True">
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}, Converter={StaticResource IsLastStepConverter}}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>-->
+                        </DataTrigger>
                     </Style.Triggers>
+                    <Style.Setters>
+                        <Setter Property="Visibility" Value="Visible" />
+                    </Style.Setters>
                 </Style>
             </ProgressBar.Style>
         </ProgressBar>
 
-        <TextBlock Name="NameStep" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TextBlockBaseStyle}"  Text="Подписать врачом"/>
+        <TextBlock Name="NameStep" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TextBlockBaseStyle}" />
     </Grid>
 </UserControl>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -17,18 +18,38 @@ namespace TestApp.StepBarV2
             CompleteColor = Colors.RoyalBlue;
             DefaultColor = Colors.Black;
 
-            Position = Position.Center;
             Status = Status.Waiting;
         }
 
-        private static readonly DependencyProperty StatusProperty = DependencyProperty.Register(nameof(Status), typeof(Status), typeof(StepBarItem), new PropertyMetadata(StepBarV2.Status.Waiting));
-
-        public Status Status
+        public static DependencyProperty ContentProperty = DependencyProperty.RegisterAttached(nameof(ActiveContent), typeof(FrameworkElement), typeof(StepBarV1.StepBarItem), new PropertyMetadata(null, null));
+        public FrameworkElement ActiveContent
         {
-            get => (Status)GetValue(StatusProperty);
+            get
+            {
+                var content = (FrameworkElement) GetValue(ContentProperty);
+                if (content == null)
+                    return new TextBlock()
+                    {
+                        Style = Resources["TextBlockBaseStyle"] as Style,
+                        Text = ((Parent as ItemsControl)?.ItemContainerGenerator.IndexFromContainer(this) + 1).ToString()
+                    };
+
+                return content;
+            }
             set
             {
-                SetValue(StatusProperty, value);
+                SetValue(ContentProperty, value);
+                StepContent.Content = ActiveContent;
+            }
+        }
+
+        private Status _status;
+        public Status Status
+        {
+            get => _status;
+            set
+            {
+                _status = value;
 
                 switch (value)
                 {
@@ -45,41 +66,14 @@ namespace TestApp.StepBarV2
             }
         }
 
-        public static readonly DependencyProperty PositionProperty = DependencyProperty.Register(nameof(Position), typeof(Position), typeof(StepBarItem), new PropertyMetadata(Position.Center, PropertyChangedCallback));
-
-        private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private string _description;
+        public string Description
         {
-            if (!(d is StepBarItem stepBarItem))
-                return;
-
-            stepBarItem.Position = (Position) e.NewValue;
-        }
-
-        public Position Position
-        {
-            get => (Position) GetValue(PositionProperty);
+            get => _description;
             set
             {
-                if (value == Position)
-                    return;
-
-                SetValue(PositionProperty, value);
-
-                switch (value)
-                {
-                    case Position.Head:
-                        LeftBar.Visibility = Visibility.Collapsed;
-                        RightBar.Visibility = Visibility.Visible;
-                        break;
-                    case Position.Center:
-                        LeftBar.Visibility = Visibility.Visible;
-                        RightBar.Visibility = Visibility.Visible;
-                        break;
-                    case Position.Tail:
-                        LeftBar.Visibility = Visibility.Visible;
-                        RightBar.Visibility = Visibility.Collapsed;
-                        break;
-                }
+                _description = value;
+                NameStep.Text = _description;
             }
         }
 
@@ -122,38 +116,38 @@ namespace TestApp.StepBarV2
 
         public void SetActiveNext()
         {
-            SetComplete();
-
-            var animation = new DoubleAnimation(0, 100, TimeSpan.FromSeconds(0.2), FillBehavior.Stop);
+            var animation = new DoubleAnimation(0, 100, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
 
             RightBar.BeginAnimation(RangeBase.ValueProperty, animation);
+
+            SetComplete();
         }
 
         public void SetActivePrev()
         {
-            SetWaiting();
-
-            var animation = new DoubleAnimation(100, 0, TimeSpan.FromSeconds(0.2), FillBehavior.Stop);
+            var animation = new DoubleAnimation(100, 0, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
 
             LeftBar.BeginAnimation(RangeBase.ValueProperty, animation);
+
+            SetWaiting();
         }
 
         public void SetActiveLeftWithAnimation()
         {
-            SetActive();
-
-            var animation = new DoubleAnimation(0, 100, TimeSpan.FromSeconds(0.2), FillBehavior.Stop);
+            var animation = new DoubleAnimation(0, 100, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
 
             LeftBar.BeginAnimation(RangeBase.ValueProperty, animation);
+            
+            SetActive();
         }
 
         public void SetActiveRightWithAnimation()
         {
-            SetActive();
-
-            var animation = new DoubleAnimation(0, 100, TimeSpan.FromSeconds(0.2), FillBehavior.Stop);
+            var animation = new DoubleAnimation(100, 0, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
 
             RightBar.BeginAnimation(RangeBase.ValueProperty, animation);
+            
+            SetActive();
         }
 
         private void SetWaiting()
@@ -164,7 +158,8 @@ namespace TestApp.StepBarV2
             Step.Fill = new SolidColorBrush(Colors.White);
 
             NameStep.Foreground = waitingColorBrush;
-            NumberStep.Foreground = waitingColorBrush;
+            //NumberStep.Foreground = waitingColorBrush;
+            StepContent.Foreground = waitingColorBrush;
 
             LeftBar.Value = 0;
             RightBar.Value = 0;
@@ -178,7 +173,8 @@ namespace TestApp.StepBarV2
             Step.Fill = new SolidColorBrush(Colors.White);
 
             NameStep.Foreground = activeColorBrush;
-            NumberStep.Foreground = activeColorBrush;
+            //NumberStep.Foreground = activeColorBrush;
+            StepContent.Foreground = activeColorBrush;
 
             LeftBar.Value = 100;
             RightBar.Value = 0;
@@ -192,7 +188,8 @@ namespace TestApp.StepBarV2
             Step.Fill = completeColorBrush;
 
             NameStep.Foreground = new SolidColorBrush(DefaultColor);
-            NumberStep.Foreground = new SolidColorBrush(Colors.White);
+            //NumberStep.Foreground = new SolidColorBrush(Colors.White);
+            StepContent.Foreground = new SolidColorBrush(Colors.White);
 
             LeftBar.Value = 100;
             RightBar.Value = 100;
@@ -204,12 +201,5 @@ namespace TestApp.StepBarV2
         Waiting,
         Active,
         Complete
-    }
-
-    public enum Position
-    {
-        Head,
-        Center,
-        Tail
     }
 }

@@ -6,7 +6,7 @@ using TestApp.StepBarV2;
 
 namespace TestApp
 {
-    public class IsFirstStepConverter : IValueConverter
+    public class IsLastStepConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -18,7 +18,7 @@ namespace TestApp
             var itemsControl = stepBarItem?.Parent as ItemsControl;
             var index = itemsControl?.ItemContainerGenerator.IndexFromContainer(stepBarItem);
 
-            return index == 0;
+            return index == itemsControl?.Items.Count - 1;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

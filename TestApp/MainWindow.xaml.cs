@@ -1,10 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace TestApp
 {
@@ -16,7 +11,7 @@ namespace TestApp
 
             List<string> labels = new List<string>() { "Подписать врачом", "Подписать МО", "В обработке", "Ошибка отправки" };
             //StepBarControla.Labels = labels;
-            ////StepBarControla.ActiveContent = new TextBlock() { Text = "a" };
+            //StepBarControla.ActiveContent = new TextBlock() { Text = "a" };
             //StepBarControla.ActiveContent = Resources["Flash"] as FrameworkElement;
         }
 
@@ -24,13 +19,13 @@ namespace TestApp
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            //if (StepBarControla.CurrentStep != 0)
-            //    StepBarControla.CurrentStep--;
+            if (StepBarControla.CurrentStep != 0)
+                StepBarControla.CurrentStep--;
         }
 
         private void NExt(object sender, RoutedEventArgs e)
         {
-            //StepBarControla.CurrentStep++;
+            StepBarControla.CurrentStep++;
         }
     }
 }

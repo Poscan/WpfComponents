@@ -13,7 +13,7 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition />
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="100" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -24,7 +24,9 @@
         <!--<stepBarV1:StepBar Grid.ColumnSpan="2" x:Name="StepBarControla" CurrentStep="3" CountStep="4" Margin="20" CompleteColor="PaleGreen" ActiveColor="DarkSeaGreen" NotActiveColor="BurlyWood" DefaultColor="GreenYellow" />-->
         
         
-        <stepBarV2:StepBar>
+        <stepBarV2:StepBar Grid.ColumnSpan="2" x:Name="StepBarControla" CurrentStep="2">
+            <stepBarV2:StepBarItem/>
+            <stepBarV2:StepBarItem/>
             <stepBarV2:StepBarItem/>
             <stepBarV2:StepBarItem/>
             <stepBarV2:StepBarItem/>
