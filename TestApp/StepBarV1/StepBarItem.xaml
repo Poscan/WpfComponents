@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:testApp="clr-namespace:TestApp"
              mc:Ignorable="d">
     <UserControl.Resources>
         <Style x:Key="NameStepBaseStyle" TargetType="TextBlock">
@@ -33,7 +32,6 @@
         <ProgressBar Height="7" Name="Bar" Maximum="100" Minimum="0" Panel.ZIndex="-1" />
 
         <Ellipse Grid.Row="0" Grid.Column="1" Name="Step" Height="30" Width="30" Panel.ZIndex="1" Style="{StaticResource EllipseNotActiveStyle}"/>
-        <ContentControl Grid.Row="0" Grid.Column="1" Name="ContentItem" Panel.ZIndex="2" />
         <TextBlock Grid.Row="0" Grid.Column="1" Text="1" Name="NumberStep" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="2" Style="{StaticResource TextNotActiveStyle}" />
 
         <TextBlock Grid.Column="1" Grid.Row="1" Name="NameStep" Style="{StaticResource HeaderNotActiveStyle}"/>

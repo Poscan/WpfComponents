@@ -55,8 +55,7 @@
         </ProgressBar>
 
         <Ellipse Name="Step" Grid.Row="0" Grid.Column="1" Style="{StaticResource EllipseBaseStyle}" Stroke="RoyalBlue" />
-        <!--<TextBlock Name="NumberStep" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBlockBaseStyle}" Text="1" />-->
-        <ContentControl Name="StepContent" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}, Path=ActiveContent}" />
+        <ContentControl Name="StepContent" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding ActiveContent, RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}}" />
 
         <ProgressBar Name="RightBar" Grid.Row="0" Grid.Column="2" >
             <ProgressBar.Style>
@@ -73,6 +72,6 @@
             </ProgressBar.Style>
         </ProgressBar>
 
-        <TextBlock Name="NameStep" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TextBlockBaseStyle}" />
+        <TextBlock Name="NameStep" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Description, RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}}" Style="{StaticResource TextBlockBaseStyle}" />
     </Grid>
 </UserControl>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -12,35 +11,20 @@ namespace TestApp.StepBarV2
         public StepBarItem()
         {
             InitializeComponent();
-
-            WaitingColor = Colors.LightGray;
-            ActiveColor = Colors.RoyalBlue;
-            CompleteColor = Colors.RoyalBlue;
-            DefaultColor = Colors.Black;
-
-            Status = Status.Waiting;
         }
 
-        public static DependencyProperty ContentProperty = DependencyProperty.RegisterAttached(nameof(ActiveContent), typeof(FrameworkElement), typeof(StepBarV1.StepBarItem), new PropertyMetadata(null, null));
+        public static readonly DependencyProperty ActiveContentProperty = DependencyProperty.RegisterAttached(nameof(ActiveContent), typeof(FrameworkElement), typeof(StepBarItem), new PropertyMetadata(null));
         public FrameworkElement ActiveContent
         {
-            get
-            {
-                var content = (FrameworkElement) GetValue(ContentProperty);
-                if (content == null)
-                    return new TextBlock()
-                    {
-                        Style = Resources["TextBlockBaseStyle"] as Style,
-                        Text = ((Parent as ItemsControl)?.ItemContainerGenerator.IndexFromContainer(this) + 1).ToString()
-                    };
+            get => (FrameworkElement)GetValue(ActiveContentProperty);
+            set => SetValue(ActiveContentProperty, value);
+        }
 
-                return content;
-            }
-            set
-            {
-                SetValue(ContentProperty, value);
-                StepContent.Content = ActiveContent;
-            }
+        public static readonly DependencyProperty DescriptionProperty = DependencyProperty.RegisterAttached(nameof(Description), typeof(string), typeof(StepBarItem), new PropertyMetadata(string.Empty));
+        public string Description
+        {
+            get => (string)GetValue(DescriptionProperty);
+            set => SetValue(DescriptionProperty, value);
         }
 
         private Status _status;
@@ -66,16 +50,8 @@ namespace TestApp.StepBarV2
             }
         }
 
-        private string _description;
-        public string Description
-        {
-            get => _description;
-            set
-            {
-                _description = value;
-                NameStep.Text = _description;
-            }
-        }
+        public Color ActiveColor { get; set; }
+        public Color DefaultColor { get; set; }
 
         private Color _waitingColor;
         public Color WaitingColor
@@ -95,8 +71,6 @@ namespace TestApp.StepBarV2
             }
         }
 
-        public Color ActiveColor { get; set; }
-
         private Color _completeColor;
         public Color CompleteColor
         {
@@ -111,8 +85,6 @@ namespace TestApp.StepBarV2
                 RightBar.Foreground = completeColorBrush;
             }
         }
-
-        public Color DefaultColor { get; set; }
 
         public void SetActiveNext()
         {
@@ -158,7 +130,6 @@ namespace TestApp.StepBarV2
             Step.Fill = new SolidColorBrush(Colors.White);
 
             NameStep.Foreground = waitingColorBrush;
-            //NumberStep.Foreground = waitingColorBrush;
             StepContent.Foreground = waitingColorBrush;
 
             LeftBar.Value = 0;
@@ -173,7 +144,6 @@ namespace TestApp.StepBarV2
             Step.Fill = new SolidColorBrush(Colors.White);
 
             NameStep.Foreground = activeColorBrush;
-            //NumberStep.Foreground = activeColorBrush;
             StepContent.Foreground = activeColorBrush;
 
             LeftBar.Value = 100;
@@ -188,7 +158,6 @@ namespace TestApp.StepBarV2
             Step.Fill = completeColorBrush;
 
             NameStep.Foreground = new SolidColorBrush(DefaultColor);
-            //NumberStep.Foreground = new SolidColorBrush(Colors.White);
             StepContent.Foreground = new SolidColorBrush(Colors.White);
 
             LeftBar.Value = 100;

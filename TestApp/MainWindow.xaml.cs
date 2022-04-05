@@ -11,19 +11,16 @@ namespace TestApp
 
             List<string> labels = new List<string>() { "Подписать врачом", "Подписать МО", "В обработке", "Ошибка отправки" };
             //StepBarControla.Labels = labels;
-            //StepBarControla.ActiveContent = new TextBlock() { Text = "a" };
-            //StepBarControla.ActiveContent = Resources["Flash"] as FrameworkElement;
         }
 
         public int Step { get; set; }
 
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        private void PrevButtonOnClick(object sender, RoutedEventArgs e)
         {
-            if (StepBarControla.CurrentStep != 0)
-                StepBarControla.CurrentStep--;
+            StepBarControla.CurrentStep--;
         }
 
-        private void NExt(object sender, RoutedEventArgs e)
+        private void NextButtonOnClick(object sender, RoutedEventArgs e)
         {
             StepBarControla.CurrentStep++;
         }
