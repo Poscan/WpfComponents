@@ -19,11 +19,8 @@ namespace TestApp.StepBarV2
 
         private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var p = this.Parent as StepBar;
-            if(p != null)
-                p.UpdateCurrentStep();
-
-            //RenderProgressBar();
+            if(Parent is StepBar stepBar)
+                stepBar.UpdateCurrentStep();
         }
 
         public static readonly DependencyProperty ActiveContentProperty = DependencyProperty.RegisterAttached(nameof(ActiveContent), typeof(FrameworkElement), typeof(StepBarItem), new PropertyMetadata(null));
@@ -61,24 +58,24 @@ namespace TestApp.StepBarV2
                         break;
                 }
 
-                RenderProgressBar();
+                UpdateProgressBars();
             }
         }
 
-        private void RenderProgressBar()
+        private void UpdateProgressBars()
         {
-            var p = Parent as ItemsControl;
-            var res = p?.ItemContainerGenerator.IndexFromContainer(this) ?? -1;
+            var stepBar = Parent as StepBar;
+            var index = stepBar?.ItemContainerGenerator.IndexFromContainer(this) ?? -1;
 
-            var stepBarItemCollection = p?.Items.OfType<StepBarItem>().ToList();
-            var firstVisibilityItem = stepBarItemCollection?.First(x => x.Visibility != Visibility.Collapsed);
-            var lastVisibilityItem = stepBarItemCollection?.Last(x => x.Visibility != Visibility.Collapsed);
+            var stepBarItemCollection = stepBar?.VisibilityItems;
+            var firstVisibilityItem = stepBarItemCollection?.First();
+            var lastVisibilityItem = stepBarItemCollection?.Last();
 
-            var firstIndex = p?.ItemContainerGenerator.IndexFromContainer(firstVisibilityItem);
-            var lastIndex = p?.ItemContainerGenerator.IndexFromContainer(lastVisibilityItem);
+            var firstIndex = stepBar?.ItemContainerGenerator.IndexFromContainer(firstVisibilityItem);
+            var lastIndex = stepBar?.ItemContainerGenerator.IndexFromContainer(lastVisibilityItem);
 
-            LeftBar.Visibility = res == firstIndex ? Visibility.Collapsed : Visibility.Visible;
-            RightBar.Visibility = res == lastIndex ? Visibility.Collapsed : Visibility.Visible;
+            LeftBar.Visibility = index == firstIndex ? Visibility.Collapsed : Visibility.Visible;
+            RightBar.Visibility = index == lastIndex ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public Color ActiveColor { get; set; }
@@ -117,41 +114,22 @@ namespace TestApp.StepBarV2
             }
         }
 
-        public void SetActiveNext()
+        private void ProgressBarBeginAnimation(ProgressBar bar, int fromValue, int toValue, Action brushAction)
         {
-            var animation = new DoubleAnimation(0, 100, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
+            var animation = new DoubleAnimation(fromValue, toValue, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
 
-            RightBar.BeginAnimation(RangeBase.ValueProperty, animation);
+            bar.BeginAnimation(RangeBase.ValueProperty, animation);
 
-            SetComplete();
+            brushAction.Invoke();
         }
 
-        public void SetActivePrev()
-        {
-            var animation = new DoubleAnimation(100, 0, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
+        public void SetActiveNext() => ProgressBarBeginAnimation(RightBar, 0, 100, SetComplete);
 
-            LeftBar.BeginAnimation(RangeBase.ValueProperty, animation);
+        public void SetActivePrev() => ProgressBarBeginAnimation(LeftBar, 100, 0, SetWaiting);
 
-            SetWaiting();
-        }
+        public void SetActiveLeftWithAnimation() => ProgressBarBeginAnimation(LeftBar, 0, 100, SetActive);
 
-        public void SetActiveLeftWithAnimation()
-        {
-            var animation = new DoubleAnimation(0, 100, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
-
-            LeftBar.BeginAnimation(RangeBase.ValueProperty, animation);
-            
-            SetActive();
-        }
-
-        public void SetActiveRightWithAnimation()
-        {
-            var animation = new DoubleAnimation(100, 0, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
-
-            RightBar.BeginAnimation(RangeBase.ValueProperty, animation);
-            
-            SetActive();
-        }
+        public void SetActiveRightWithAnimation() => ProgressBarBeginAnimation(RightBar, 100, 0, SetActive);
 
         private void SetWaiting()
         {
