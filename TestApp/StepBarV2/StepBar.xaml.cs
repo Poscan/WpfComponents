@@ -1,7 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 namespace TestApp.StepBarV2
@@ -12,17 +15,21 @@ namespace TestApp.StepBarV2
         {
             InitializeComponent();
 
-            var items = Items as INotifyPropertyChanged;
-            items.PropertyChanged += ItemsCollectionChanged;
+            var items = Items as INotifyCollectionChanged;
+            items.CollectionChanged += ItemsOnCollectionChanged;
+            //ItemContainerGenerator.StatusChanged += ItemContainerGeneratorOnStatusChanged;
         }
 
-        ~StepBar()
+        private void ItemContainerGeneratorOnStatusChanged(object? sender, EventArgs e)
         {
-            var items = Items as INotifyPropertyChanged;
-            items.PropertyChanged -= ItemsCollectionChanged;
+            var itemContainerGenerator = sender as ItemContainerGenerator;
+            if (itemContainerGenerator?.Status == GeneratorStatus.ContainersGenerated)
+            {
+                UpdateCurrentStep();
+            }
         }
 
-        private void ItemsCollectionChanged(object sender, PropertyChangedEventArgs e)
+        private void ItemsOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateCurrentStep();
         }
@@ -47,7 +54,8 @@ namespace TestApp.StepBarV2
                     return;
 
                 var currentStep = value < 0 ? 0 : value;
-                currentStep = currentStep > Items.Count ? Items.Count : currentStep;
+                var itemsCount = Items.OfType<StepBarItem>().Count(x => x.Visibility != Visibility.Collapsed);
+                currentStep = currentStep > itemsCount ? itemsCount : currentStep;
                 SetValue(CurrentStepProperty, currentStep);
             }
         }
@@ -92,15 +100,15 @@ namespace TestApp.StepBarV2
             stepBarList.UpdateCurrentStep();
         }
 
-        private void UpdateCurrentStep(int oldStep = 0)
+        public void UpdateCurrentStep(int oldStep = 0)
         {
             var stepBarItems = Items;
 
-            for (var i = 0; i < stepBarItems.Count; i++)
+            for (int i = 0, j = 0; i < stepBarItems.Count; i++)
             {
                 var stepBarItem = stepBarItems[i] as StepBarItem;
 
-                if(stepBarItem == null)
+                if(stepBarItem == null || stepBarItem.Visibility == Visibility.Collapsed)
                     continue;
 
                 stepBarItem.ActiveColor = ActiveColor;
@@ -112,14 +120,16 @@ namespace TestApp.StepBarV2
                 {
                     stepBarItem.ActiveContent = new TextBlock()
                     {
-                        Text = (i + 1).ToString(),
+                        Text = (j + 1).ToString(),
                     };
                 }
 
-                if(i == CurrentStep)
-                    continue;
-
-                stepBarItem.Status = i < CurrentStep ? Status.Complete : Status.Waiting;
+                if(j != CurrentStep)
+                {
+                    stepBarItem.Status = j < CurrentStep ? Status.Complete : Status.Waiting;
+                }
+                
+                j++;
             }
 
             if(CurrentStep < Items.Count && CurrentStep >= 0)
@@ -130,13 +140,17 @@ namespace TestApp.StepBarV2
 
         private async Task StartAnimation(int oldStep)
         {
-            var currentStepItem = Items[CurrentStep] as StepBarItem;
+            var visibleItems = Items.OfType<StepBarItem>().Where(x => x.Visibility != Visibility.Collapsed).ToList();
+            if(visibleItems.Count < CurrentStep + 1)
+                return;
+
+            var currentStepItem = visibleItems[CurrentStep];
 
             if (CurrentStep > oldStep)
             {
                 if (CurrentStep > 0)
                 {
-                    var prevStep = Items[CurrentStep - 1] as StepBarItem;
+                    var prevStep = visibleItems[CurrentStep - 1];
                     prevStep?.SetActiveNext();
 
                     await Task.Delay(90);
@@ -146,9 +160,9 @@ namespace TestApp.StepBarV2
             }
             else
             {
-                if (CurrentStep + 1 < Items.Count)
+                if (CurrentStep + 1 < visibleItems.Count)
                 {
-                    var nextStep = Items[CurrentStep + 1] as StepBarItem;
+                    var nextStep = visibleItems[CurrentStep + 1];
                     nextStep?.SetActivePrev();
 
                     await Task.Delay(90);
@@ -156,6 +170,8 @@ namespace TestApp.StepBarV2
 
                 currentStepItem?.SetActiveRightWithAnimation();
             }
+
+            currentStepItem.Status = Status.Active;
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -11,6 +13,17 @@ namespace TestApp.StepBarV2
         public StepBarItem()
         {
             InitializeComponent();
+
+            IsVisibleChanged += OnIsVisibleChanged;
+        }
+
+        private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var p = this.Parent as StepBar;
+            if(p != null)
+                p.UpdateCurrentStep();
+
+            //RenderProgressBar();
         }
 
         public static readonly DependencyProperty ActiveContentProperty = DependencyProperty.RegisterAttached(nameof(ActiveContent), typeof(FrameworkElement), typeof(StepBarItem), new PropertyMetadata(null));
@@ -47,7 +60,25 @@ namespace TestApp.StepBarV2
                         SetComplete();
                         break;
                 }
+
+                RenderProgressBar();
             }
+        }
+
+        private void RenderProgressBar()
+        {
+            var p = Parent as ItemsControl;
+            var res = p?.ItemContainerGenerator.IndexFromContainer(this) ?? -1;
+
+            var stepBarItemCollection = p?.Items.OfType<StepBarItem>().ToList();
+            var firstVisibilityItem = stepBarItemCollection?.First(x => x.Visibility != Visibility.Collapsed);
+            var lastVisibilityItem = stepBarItemCollection?.Last(x => x.Visibility != Visibility.Collapsed);
+
+            var firstIndex = p?.ItemContainerGenerator.IndexFromContainer(firstVisibilityItem);
+            var lastIndex = p?.ItemContainerGenerator.IndexFromContainer(lastVisibilityItem);
+
+            LeftBar.Visibility = res == firstIndex ? Visibility.Collapsed : Visibility.Visible;
+            RightBar.Visibility = res == lastIndex ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public Color ActiveColor { get; set; }
@@ -163,12 +194,5 @@ namespace TestApp.StepBarV2
             LeftBar.Value = 100;
             RightBar.Value = 100;
         }
-    }
-
-    public enum Status
-    {
-        Waiting,
-        Active,
-        Complete
     }
 }

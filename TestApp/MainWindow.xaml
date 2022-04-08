@@ -9,6 +9,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="100" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -18,8 +19,7 @@
 
         <!--<stepBarV1:StepBar Grid.ColumnSpan="2" x:Name="StepBarControla" CurrentStep="3" CountStep="4" Margin="20" CompleteColor="PaleGreen" ActiveColor="DarkSeaGreen" NotActiveColor="BurlyWood" DefaultColor="GreenYellow" />-->
 
-
-        <stepBarV2:StepBar Grid.ColumnSpan="2" x:Name="StepBarControla" CurrentStep="60" >
+        <stepBarV2:StepBar Grid.Row="1" Grid.ColumnSpan="2" x:Name="StepBarControla" CurrentStep="60" ActiveColor="Aqua" CompleteColor="Aqua">
             <stepBarV2:StepBarItem Description="Подписать ">
                 <stepBarV2:StepBarItem.ActiveContent>
                     <TextBlock>
@@ -27,16 +27,16 @@
                     </TextBlock>
                 </stepBarV2:StepBarItem.ActiveContent>
             </stepBarV2:StepBarItem>
-            <stepBarV2:StepBarItem />
+            <stepBarV2:StepBarItem/>
             <stepBarV2:StepBarItem Description="В обработке" />
-            <stepBarV2:StepBarItem />
-            <stepBarV2:StepBarItem />
-            <stepBarV2:StepBarItem />
-            <stepBarV2:StepBarItem />
-            <stepBarV2:StepBarItem />
+            <stepBarV2:StepBarItem/>
+            <stepBarV2:StepBarItem Visibility="Collapsed"/>
+            <stepBarV2:StepBarItem/>
         </stepBarV2:StepBar>
 
-        <Button Grid.Row="1" Width="100" Height="20" HorizontalAlignment="Right" Margin="0, 0, 20, 0" Click="PrevButtonOnClick" Content="Prev" />
-        <Button Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Width="100" Height="20" Margin="20, 0, 0, 0" Click="NextButtonOnClick" Content="Next" />
+        <Button Grid.Row="2" Width="100" Height="20" HorizontalAlignment="Right" Margin="0, 0, 20, 0"
+                Click="PrevButtonOnClick" Content="Prev" />
+        <Button Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" Width="100" Height="20" Margin="20, 0, 0, 0"
+                Click="NextButtonOnClick" Content="Next" />
     </Grid>
 </Window>
