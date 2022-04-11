@@ -21,6 +21,7 @@ namespace TestApp.StepBarV2
         private void ItemsOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateCurrentStep();
+            StartAnimation(0);
         }
 
         public static readonly DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int), typeof(StepBar), new PropertyMetadata(1, CurrentStepChangedCallback));
@@ -31,7 +32,12 @@ namespace TestApp.StepBarV2
                 return;
 
             stepBarList.CurrentStep = (int) dependencyPropertyChangedEventArgs.NewValue;
-            stepBarList.UpdateCurrentStep((int) dependencyPropertyChangedEventArgs.OldValue);
+            stepBarList.UpdateCurrentStep();
+
+            if (stepBarList.CurrentStep < stepBarList.Items.Count && stepBarList.CurrentStep >= 0)
+            {
+                stepBarList.StartAnimation((int)dependencyPropertyChangedEventArgs.OldValue);
+            }
         }
 
         public int CurrentStep
@@ -92,7 +98,7 @@ namespace TestApp.StepBarV2
 
         public IList<StepBarItem> VisibilityItems => Items.OfType<StepBarItem>().Where(x => x.Visibility == Visibility.Visible).ToList();
 
-        public void UpdateCurrentStep(int oldStep = 0)
+        public void UpdateCurrentStep()
         {
             var visibilityItems = VisibilityItems;
             for (int currentIndex = 0; currentIndex < visibilityItems.Count; currentIndex++)
@@ -116,11 +122,6 @@ namespace TestApp.StepBarV2
                 {
                     stepBarItem.Status = currentIndex < CurrentStep ? Status.Complete : Status.Waiting;
                 }
-            }
-
-            if(CurrentStep < Items.Count && CurrentStep >= 0)
-            {
-                StartAnimation(oldStep);
             }
         }
 

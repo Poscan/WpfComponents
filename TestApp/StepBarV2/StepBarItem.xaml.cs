@@ -65,21 +65,40 @@ namespace TestApp.StepBarV2
         private void UpdateProgressBars()
         {
             var stepBar = Parent as StepBar;
-            var index = stepBar?.ItemContainerGenerator.IndexFromContainer(this) ?? -1;
 
             var stepBarItemCollection = stepBar?.VisibilityItems;
             var firstVisibilityItem = stepBarItemCollection?.First();
             var lastVisibilityItem = stepBarItemCollection?.Last();
 
-            var firstIndex = stepBar?.ItemContainerGenerator.IndexFromContainer(firstVisibilityItem);
-            var lastIndex = stepBar?.ItemContainerGenerator.IndexFromContainer(lastVisibilityItem);
+            var firstIndex = firstVisibilityItem?.GetIndex();
+            var lastIndex = lastVisibilityItem?.GetIndex();
 
-            LeftBar.Visibility = index == firstIndex ? Visibility.Collapsed : Visibility.Visible;
-            RightBar.Visibility = index == lastIndex ? Visibility.Collapsed : Visibility.Visible;
+            var newIndex = GetIndex();
+
+            LeftBar.Visibility = newIndex == firstIndex ? Visibility.Collapsed : Visibility.Visible;
+            RightBar.Visibility = newIndex == lastIndex ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        public Color ActiveColor { get; set; }
-        public Color DefaultColor { get; set; }
+        private int GetIndex()
+        {
+            var stepBar = Parent as StepBar;
+            var hashCode = GetHashCode();
+            var newIndex = -1;
+
+            for (var i = 0; i < stepBar?.Items.Count; i++)
+            {
+                if (stepBar?.Items[i].GetHashCode() == hashCode)
+                {
+                    newIndex = i;
+                    break;
+                }
+            }
+
+            return newIndex;
+        }
+
+        public Color ActiveColor;
+        public Color DefaultColor;
 
         private Color _waitingColor;
         public Color WaitingColor
