@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,11 +20,18 @@ namespace TestApp.StepBarV2
 
         private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if(Parent is StepBar stepBar)
-                stepBar.UpdateCurrentStep();
+            if (Parent is StepBar stepBar)
+            {
+                SetWaiting(0);
+                _status = Status.Waiting;
+
+                stepBar.UpdateCurrentStep(0);
+                UpdateProgressBars();
+            }
         }
 
         public static readonly DependencyProperty ActiveContentProperty = DependencyProperty.RegisterAttached(nameof(ActiveContent), typeof(FrameworkElement), typeof(StepBarItem), new PropertyMetadata(null));
+
         public FrameworkElement ActiveContent
         {
             get => (FrameworkElement)GetValue(ActiveContentProperty);
@@ -31,6 +39,7 @@ namespace TestApp.StepBarV2
         }
 
         public static readonly DependencyProperty DescriptionProperty = DependencyProperty.RegisterAttached(nameof(Description), typeof(string), typeof(StepBarItem), new PropertyMetadata(string.Empty));
+
         public string Description
         {
             get => (string)GetValue(DescriptionProperty);
@@ -38,14 +47,18 @@ namespace TestApp.StepBarV2
         }
 
         private Status _status;
+
         public Status Status
         {
             get => _status;
             set
             {
+                if (_status == value)
+                    return;
+
                 _status = value;
 
-                switch (value)
+                switch (_status)
                 {
                     case Status.Waiting:
                         SetWaiting();
@@ -57,12 +70,10 @@ namespace TestApp.StepBarV2
                         SetComplete();
                         break;
                 }
-
-                UpdateProgressBars();
             }
         }
 
-        private void UpdateProgressBars()
+        public void UpdateProgressBars()
         {
             var stepBar = Parent as StepBar;
 
@@ -97,71 +108,125 @@ namespace TestApp.StepBarV2
             return newIndex;
         }
 
-        public Color ActiveColor;
-        public Color DefaultColor;
+        private Color _activeColor;
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public Color ActiveColor
+        {
+            get => _activeColor;
+            set
+            {
+                if (_activeColor == value)
+                    return;
+
+                _activeColor = value;
+
+                if (Status == Status.Active)
+                {
+                    SetActive();
+                }
+            }
+        }
+
+        private Color _defaultColor;
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public Color DefaultColor
+        {
+            get => _defaultColor;
+            set
+            {
+                if (_defaultColor == value)
+                    return;
+
+                _defaultColor = value;
+
+                if (Status == Status.Complete)
+                {
+                    SetComplete(0);
+                }
+            }
+        }
 
         private Color _waitingColor;
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color WaitingColor
         {
             get => _waitingColor;
             set
             {
+                if (_waitingColor == value)
+                    return;
+
                 _waitingColor = value;
 
                 var waitingColorBrush = new SolidColorBrush(value);
 
                 LeftBar.Background = waitingColorBrush;
                 LeftBar.BorderBrush = waitingColorBrush;
-                
+
                 RightBar.Background = waitingColorBrush;
                 RightBar.BorderBrush = waitingColorBrush;
+
+                if (Status == Status.Waiting)
+                {
+                    SetWaiting(0);
+                }
             }
         }
 
         private Color _completeColor;
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color CompleteColor
         {
             get => _completeColor;
             set
             {
+                if (_completeColor == value)
+                    return;
+
                 _completeColor = value;
 
                 var completeColorBrush = new SolidColorBrush(value);
 
                 LeftBar.Foreground = completeColorBrush;
                 RightBar.Foreground = completeColorBrush;
+
+                if (Status == Status.Complete)
+                {
+                    SetComplete(0);
+                }
             }
         }
 
-        private void ProgressBarBeginAnimation(ProgressBar bar, int fromValue, int toValue, Action brushAction)
+        private void ProgressBarBeginAnimation(ProgressBar bar, int toValue)
         {
-            var animation = new DoubleAnimation(fromValue, toValue, TimeSpan.FromSeconds(0.1), FillBehavior.Stop);
+            var animation = new DoubleAnimation(toValue, TimeSpan.FromSeconds(0.1), FillBehavior.HoldEnd);
+            animation.BeginTime = TimeSpan.FromSeconds(0.1);
 
+            SetActive();
             bar.BeginAnimation(RangeBase.ValueProperty, animation);
-
-            brushAction.Invoke();
         }
 
-        public void SetActiveNext() => ProgressBarBeginAnimation(RightBar, 0, 100, SetComplete);
-
-        public void SetActivePrev() => ProgressBarBeginAnimation(LeftBar, 100, 0, SetWaiting);
-
-        public void SetActiveLeftWithAnimation() => ProgressBarBeginAnimation(LeftBar, 0, 100, SetActive);
-
-        public void SetActiveRightWithAnimation() => ProgressBarBeginAnimation(RightBar, 100, 0, SetActive);
-
-        private void SetWaiting()
+        public void SetActiveLeftWithAnimation()
         {
-            var waitingColorBrush = new SolidColorBrush(WaitingColor);
+            ProgressBarBeginAnimation(LeftBar, 100);
 
-            Step.Stroke = waitingColorBrush;
-            Step.Fill = new SolidColorBrush(Colors.White);
+            var animation = new DoubleAnimation(0, TimeSpan.FromSeconds(0), FillBehavior.HoldEnd);
+            RightBar.BeginAnimation(RangeBase.ValueProperty, animation);
+        }
 
-            NameStep.Foreground = waitingColorBrush;
-            StepContent.Foreground = waitingColorBrush;
-
-            LeftBar.Value = 0;
-            RightBar.Value = 0;
+        public void SetActiveRightWithAnimation()
+        {
+            ProgressBarBeginAnimation(RightBar, 0);
+            var animation = new DoubleAnimation(100, TimeSpan.FromSeconds(0), FillBehavior.HoldEnd);
+            LeftBar.BeginAnimation(RangeBase.ValueProperty, animation);
         }
 
         private void SetActive()
@@ -173,12 +238,27 @@ namespace TestApp.StepBarV2
 
             NameStep.Foreground = activeColorBrush;
             StepContent.Foreground = activeColorBrush;
-
-            LeftBar.Value = 100;
-            RightBar.Value = 0;
         }
 
-        private void SetComplete()
+        public void SetWaiting(double duration = 0.1)
+        {
+            var waitingColorBrush = new SolidColorBrush(WaitingColor);
+
+            Step.Stroke = waitingColorBrush;
+            Step.Fill = new SolidColorBrush(Colors.White);
+
+            NameStep.Foreground = waitingColorBrush;
+            StepContent.Foreground = waitingColorBrush;
+
+            var leftAnimation = new DoubleAnimation(0, TimeSpan.FromSeconds(duration), FillBehavior.HoldEnd);
+            LeftBar.BeginAnimation(RangeBase.ValueProperty, leftAnimation);
+            var rightAnimation = new DoubleAnimation(0, TimeSpan.FromSeconds(0), FillBehavior.HoldEnd);
+            RightBar.BeginAnimation(RangeBase.ValueProperty, rightAnimation);
+
+            _status = Status.Waiting;
+        }
+
+        public void SetComplete(double duration = 0.1)
         {
             var completeColorBrush = new SolidColorBrush(CompleteColor);
 
@@ -188,8 +268,12 @@ namespace TestApp.StepBarV2
             NameStep.Foreground = new SolidColorBrush(DefaultColor);
             StepContent.Foreground = new SolidColorBrush(Colors.White);
 
-            LeftBar.Value = 100;
-            RightBar.Value = 100;
+            var rightAnimation = new DoubleAnimation(100, TimeSpan.FromSeconds(duration), FillBehavior.HoldEnd);
+            RightBar.BeginAnimation(RangeBase.ValueProperty, rightAnimation);
+            var leftAnimation = new DoubleAnimation(100, TimeSpan.FromSeconds(0), FillBehavior.HoldEnd);
+            LeftBar.BeginAnimation(RangeBase.ValueProperty, leftAnimation);
+
+            _status = Status.Complete;
         }
     }
 }

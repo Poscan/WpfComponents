@@ -21,40 +21,59 @@ namespace TestApp.StepBarV2
         private void ItemsOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateCurrentStep();
-            StartAnimation(0);
+            (Items[0] as StepBarItem)?.UpdateProgressBars();
         }
 
-        public static readonly DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int), typeof(StepBar), new PropertyMetadata(1, CurrentStepChangedCallback));
+        public static readonly DependencyProperty CurrentStepProperty = DependencyProperty.Register(nameof(CurrentStep), typeof(int), typeof(StepBar), new PropertyMetadata(0, CurrentStepChangedCallback, CoerceValueCallback));
+
+        private static object CoerceValueCallback(DependencyObject dependencyObject, object baseValue)
+        {
+            var value = (int)baseValue;
+
+            return value < 0 ? 0 : value;
+        }
 
         private static void CurrentStepChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             if (!(dependencyObject is StepBar stepBarList))
                 return;
 
-            stepBarList.CurrentStep = (int) dependencyPropertyChangedEventArgs.NewValue;
-            stepBarList.UpdateCurrentStep();
+            var value = (int)dependencyPropertyChangedEventArgs.NewValue;
+            var itemsCount = stepBarList.VisibilityItems.Count;
+            if (itemsCount == 0)
+                return;
 
+            var currentStep = value > itemsCount ? itemsCount : value;
+
+            stepBarList._prevStep = (int)dependencyPropertyChangedEventArgs.OldValue;
+            stepBarList._currentStep = currentStep;
+
+            stepBarList.UpdateCurrentStep();
             if (stepBarList.CurrentStep < stepBarList.Items.Count && stepBarList.CurrentStep >= 0)
             {
-                stepBarList.StartAnimation((int)dependencyPropertyChangedEventArgs.OldValue);
+                stepBarList.StartAnimation();
             }
         }
 
+        private int _currentStep;
         public int CurrentStep
         {
             get => (int)GetValue(CurrentStepProperty);
             set
             {
-                if (CurrentStep == value)
+                if (_currentStep == value)
                     return;
 
-                var currentStep = value < 0 ? 0 : value;
                 var itemsCount = VisibilityItems.Count;
-                currentStep = currentStep > itemsCount ? itemsCount : currentStep;
+                var currentStep = value > itemsCount ? itemsCount : value;
 
+                _prevStep = _currentStep;
+                _currentStep = currentStep;
                 SetValue(CurrentStepProperty, currentStep);
             }
         }
+
+        private int _prevStep;
 
         public static readonly DependencyProperty ActiveColorProperty = DependencyProperty.Register(nameof(ActiveColor), typeof(Color), typeof(StepBar), new PropertyMetadata(Colors.RoyalBlue, ColorChangedCallback));
 
@@ -98,10 +117,11 @@ namespace TestApp.StepBarV2
 
         public IList<StepBarItem> VisibilityItems => Items.OfType<StepBarItem>().Where(x => x.Visibility == Visibility.Visible).ToList();
 
-        public void UpdateCurrentStep()
+        public void UpdateCurrentStep(double duration = 0.1)
         {
             var visibilityItems = VisibilityItems;
-            for (int currentIndex = 0; currentIndex < visibilityItems.Count; currentIndex++)
+
+            for (var currentIndex = 0; currentIndex < visibilityItems.Count; currentIndex++)
             {
                 var stepBarItem = visibilityItems[currentIndex];
 
@@ -114,51 +134,47 @@ namespace TestApp.StepBarV2
                 {
                     stepBarItem.ActiveContent = new TextBlock()
                     {
-                        Text = (currentIndex + 1).ToString(),
+                        Text = (currentIndex + 1).ToString()
                     };
                 }
 
-                if(currentIndex != CurrentStep)
+                if (currentIndex != CurrentStep)
                 {
-                    stepBarItem.Status = currentIndex < CurrentStep ? Status.Complete : Status.Waiting;
+                    if (currentIndex < CurrentStep)
+                    {
+                        stepBarItem.SetComplete(duration);
+                    }
+                    else
+                    {
+                        stepBarItem.SetWaiting(duration);
+                    }
                 }
             }
+
+            StartAnimation();
         }
 
-        private async Task StartAnimation(int oldStep)
+        private void StartAnimation()
         {
             var visibleItems = VisibilityItems;
-            if (visibleItems.Count < CurrentStep + 1)
+            if (visibleItems.Count < CurrentStep + 1 || CurrentStep < 0)
                 return;
 
             var currentStepItem = visibleItems[CurrentStep];
 
-            if (CurrentStep > oldStep)
+            if (CurrentStep > _prevStep)
             {
-                if (CurrentStep > 0)
-                {
-                    var prevStep = visibleItems[CurrentStep - 1];
-                    prevStep?.SetActiveNext();
-
-                    await Task.Delay(90);
-                }
-
                 currentStepItem?.SetActiveLeftWithAnimation();
             }
             else
             {
-                if (CurrentStep + 1 < visibleItems.Count)
-                {
-                    var nextStep = visibleItems[CurrentStep + 1];
-                    nextStep?.SetActivePrev();
-
-                    await Task.Delay(90);
-                }
-
                 currentStepItem?.SetActiveRightWithAnimation();
             }
 
-            currentStepItem.Status = Status.Active;
+            if (currentStepItem != null)
+            {
+                currentStepItem.Status = Status.Active;
+            }
         }
     }
 }
