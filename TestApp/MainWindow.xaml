@@ -4,13 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:stepBarV2="clr-namespace:TestApp.StepBarV2"
+        xmlns:stepBarV3="clr-namespace:TestApp.StepBarV3"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="100" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -38,5 +41,14 @@
                 Click="PrevButtonOnClick" Content="Prev" />
         <Button Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" Width="100" Height="20" Margin="20, 0, 0, 0"
                 Click="NextButtonOnClick" Content="Next" />
+
+        <stepBarV3:StepBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" CurrentStep="3">
+            <stepBarV3:StepBarItem/>
+            <stepBarV3:StepBarItem/>
+            <stepBarV3:StepBarItem/>
+            <stepBarV3:StepBarItem/>
+            <stepBarV3:StepBarItem/>
+            <stepBarV3:StepBarItem/>
+        </stepBarV3:StepBar>
     </Grid>
 </Window>

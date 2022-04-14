@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:stepBarV2="clr-namespace:TestApp.StepBarV2"
-             xmlns:testApp="clr-namespace:TestApp"
              mc:Ignorable="d"
              HorizontalAlignment="Stretch"
              UseLayoutRounding="True"
@@ -18,8 +17,6 @@
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
         <Style x:Key="TextBlockBaseStyle" TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
         <Style x:Key="EllipseBaseStyle" TargetType="Ellipse">
@@ -28,7 +25,7 @@
         </Style>
 
     </UserControl.Resources>
-    <Grid Background="Azure">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="30" />
@@ -36,7 +33,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
-            <RowDefinition />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <ProgressBar Name="LeftBar" Grid.Row="0" Grid.Column="0" Margin="-1, 0, 0, 0" Style="{StaticResource ProgressBarBaseStyle}" />
@@ -46,6 +43,6 @@
 
         <ProgressBar Name="RightBar" Grid.Row="0" Grid.Column="2" Margin="0, 0, -1, 0" Style="{StaticResource ProgressBarBaseStyle}" />
 
-        <TextBlock Name="NameStep" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Description, RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}}" Style="{StaticResource TextBlockBaseStyle}" />
+        <TextBlock Name="NameStep" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="3" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding Description, RelativeSource={RelativeSource AncestorType={x:Type stepBarV2:StepBarItem}}}" Style="{StaticResource TextBlockBaseStyle}" />
     </Grid>
 </UserControl>
